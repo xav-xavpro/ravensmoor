@@ -332,10 +332,12 @@ async function pushScore(){const p=ensurePlayer();if(!p.pseudo)return null;const
   await rpc('submit_score',{p_id:p.id,p_secret:p.secret,p_pseudo:p.pseudo,p_stars:t.st,p_mistakes:t.mi,p_rooms:t.ro,p_lang:LG});
   return rpc('get_leaderboard',{p_id:p.id})}
 let lastBoard=null;
+const onPages=/github\.io$/.test(location.hostname);
+function rankOffMsg(){return onPages?T('rankOff'):T('rankHost')}
 function ord(n){return LG==='fr'?(n===1?'1er':n+'e'):n+(['th','st','nd','rd'][(n%100>10&&n%100<14)?0:Math.min(n%10,4)%4]||'th')}
 async function showRank(){const el=$('clueRank');el.textContent=T('rankLoading');
   try{const b=await pushScore();lastBoard=b;if(b&&b.me)el.textContent=T('rankLine',{r:ord(b.me.rank),n:b.total});else el.textContent=''}
-  catch(e){el.textContent=T('rankOff')}}
+  catch(e){el.textContent=rankOffMsg()}}
 async function openBoard(){const l=$('boardList');openOv('board');
   if(!(S.player&&S.player.pseudo)){l.innerHTML='<p>'+T('rankNoPseudo')+'</p>';return}
   l.innerHTML='<p>'+T('rankLoading')+'</p>';
@@ -347,7 +349,7 @@ async function openBoard(){const l=$('boardList');openOv('board');
     const p=document.createElement('p');p.style.cssText='font-size:.9rem;color:var(--tan);margin-bottom:.4rem';p.textContent=T('rankTotal',{n:b.total});l.appendChild(p);
     b.top.forEach(row);
     if(b.me&&b.me.rank>10){const s=document.createElement('div');s.className='bsep';s.textContent='…';l.appendChild(s);row(Object.assign({me:true},b.me))}
-  }catch(e){l.innerHTML='<p>'+T('rankOff')+'</p>'}}
+  }catch(e){l.innerHTML='<p>'+rankOffMsg()+'</p>'}}
 
 function renderMap(){
   $('prog').innerHTML=S.done.length+' / 14 '+T('clues')+' · <span class="stars">'+totalStars()+' / 42 ★</span>';
